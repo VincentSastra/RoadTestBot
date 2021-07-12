@@ -14,7 +14,7 @@ exports.checkAppointment = async () => {
 
 	try {
 		let body = JSON.stringify({
-			drvrLastName: process.env.lastName,
+			drvrLastName: process.env.lastname,
 			keyword: process.env.keyword,
 			licenceNumber: process.env.license,
 		})
@@ -36,7 +36,7 @@ exports.checkAppointment = async () => {
 				examDate: "2021-07-12",
 				examType: "5-R-1",
 				ignoreReserveTime: false,
-				lastName: process.env.lastName,
+				lastName: process.env.lastname,
 				licenseNumber: process.env.license,
 				prfDaysOfWeek: "[0,1,2,3,4,5,6]",
 				prfPartsOfDay: "[0,1]",
