@@ -3,7 +3,7 @@ const nodemailer = require('nodemailer')
 
 require('dotenv').config()
 
-exports.handler =  async (event, context) => {
+exports.handler =  async function(event, context) {
 	const mail = nodemailer.createTransport({
 		service: 'gmail',
 		auth: {
@@ -28,7 +28,6 @@ exports.handler =  async (event, context) => {
 				'Content-Type': 'application/json',
 			},
 		})
-		console.log(authReq)
 
 		const authToken = authReq.headers.raw().authorization[0]
 
@@ -64,13 +63,17 @@ exports.handler =  async (event, context) => {
 			}, ""))
 
 		if (availableBefore !== undefined) {
-			mail.sendMail({
+			await mail.sendMail({
 				from: process.env.gmailname,
 				to: process.env.gmailgoal,
 				subject: 'Booking found on ' + new Date(availableBefore).toDateString(),
-				text: 'Gogogo!',
+				text: "All date: \n" +
+			appointmentJson.reduce((acc, cur) => {
+				const appointmentDate = new Date(cur.appointmentDt.date)
+				return acc + "\n" + appointmentDate 
+			}, ""),
 			})
-			console.log("Found" + availableBefore)
+			console.log("Found " + availableBefore)
 		} else {
 			console.log("Earliest is " + (new Date(appointmentJson[0]?.appointmentDt?.date)))
 		}
