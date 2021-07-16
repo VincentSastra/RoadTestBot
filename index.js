@@ -3,7 +3,7 @@ const nodemailer = require('nodemailer')
 
 require('dotenv').config()
 
-exports.handler =  async function(event, context) {
+exports.handler = async function (event, context) {
 	const mail = nodemailer.createTransport({
 		service: 'gmail',
 		auth: {
@@ -11,7 +11,7 @@ exports.handler =  async function(event, context) {
 			pass: process.env.gmailpass,
 		}
 	});
-	
+
 	const searchDate = new Date(process.env.searchdate)
 
 	try {
@@ -49,17 +49,23 @@ exports.handler =  async function(event, context) {
 			}
 		})
 
-		const appointmentJson = await appointmentRequest.json()
+		let appointmentJson = await appointmentRequest.json()
+
+		const curTime = new Date()
+		appointmentJson = appointmentJson.filter(row => {
+			const rowTime = new Date(row.appointmentDt.date)
+			return curTime.getTime() < rowTime.getTime()
+		})
 
 		const availableBefore = appointmentJson.find(row => {
 			const appointmentDate = new Date(row.appointmentDt.date)
 			return appointmentDate.getTime() < searchDate.getTime()
 		})?.appointmentDt?.date
-		
+
 		console.log("All date: \n" +
 			appointmentJson.reduce((acc, cur) => {
 				const appointmentDate = new Date(cur.appointmentDt.date)
-				return acc + "\n" + appointmentDate 
+				return acc + "\n" + appointmentDate
 			}, ""))
 
 		if (availableBefore !== undefined) {
@@ -68,13 +74,23 @@ exports.handler =  async function(event, context) {
 				to: process.env.gmailgoal,
 				subject: 'Booking found on ' + new Date(availableBefore).toDateString(),
 				text: "All date: \n" +
-			appointmentJson.reduce((acc, cur) => {
-				const appointmentDate = new Date(cur.appointmentDt.date)
-				return acc + "\n" + appointmentDate 
-			}, ""),
+					appointmentJson.reduce((acc, cur) => {
+						const appointmentDate = new Date(cur.appointmentDt.date)
+						return acc + "\n" + appointmentDate
+					}, ""),
 			})
 			console.log("Found " + availableBefore)
 		} else {
+			await mail.sendMail({
+				from: process.env.gmailname,
+				to: process.env.gmailname,
+				subject: 'No booking found',
+				text: "All date: \n" +
+					appointmentJson.reduce((acc, cur) => {
+						const appointmentDate = new Date(cur.appointmentDt.date)
+						return acc + "\n" + appointmentDate
+					}, ""),
+			})
 			console.log("Earliest is " + (new Date(appointmentJson[0]?.appointmentDt?.date)))
 		}
 	} catch (e) {
