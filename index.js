@@ -72,11 +72,11 @@ exports.handler = async function (event, context) {
 			await mail.sendMail({
 				from: process.env.gmailname,
 				to: process.env.gmailgoal,
-				subject: 'Booking found on ' + new Date(availableBefore).toDateString(),
+				subject: 'Booking found on ' + new Date(availableBefore).toLocaleString('en-US', { timeZone: 'America/Los_Angeles' }),
 				text: "All date: \n" +
 					appointmentJson.reduce((acc, cur) => {
 						const appointmentDate = new Date(cur.appointmentDt.date)
-						return acc + "\n" + appointmentDate
+						return acc + "\n" + appointmentDate.toLocaleString('en-US', { timeZone: 'America/Los_Angeles' })
 					}, ""),
 			})
 			console.log("Found " + availableBefore)
@@ -88,7 +88,7 @@ exports.handler = async function (event, context) {
 				text: "All date: \n" +
 					appointmentJson.reduce((acc, cur) => {
 						const appointmentDate = new Date(cur.appointmentDt.date)
-						return acc + "\n" + appointmentDate
+						return acc + "\n" + appointmentDate.toLocaleString('en-US', { timeZone: 'America/Los_Angeles' })
 					}, ""),
 			})
 			console.log("Earliest is " + (new Date(appointmentJson[0]?.appointmentDt?.date)))
